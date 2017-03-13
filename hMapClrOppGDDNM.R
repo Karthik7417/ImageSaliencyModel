@@ -1,4 +1,5 @@
-require('magick','imager')
+require('magick','imager','ptw')
+library(ptw)
 source("https://raw.githubusercontent.com/ggrothendieck/gsubfn/master/R/list.R")
 
 hMapClrOppGGDNM <- function(img, filterType, levelNum, krnSz){
@@ -46,7 +47,7 @@ hMapClrOppGGDNM <- function(img, filterType, levelNum, krnSz){
       img.df[,,5] = bwimg*255
    }
    
-   [pyr, pind] <- buildSpyr(img.df[,,1], levelNum, filterType, 'reflect1')
+   list[pyr, pind] <- buildSpyr(img.df[,,1], levelNum, filterType, 'reflect1')
    
    imorg = ind2wtree(abs(pyr), pind)
    subbands = 1:length(imorg)
@@ -69,10 +70,30 @@ hMapClrOppGGDNM <- function(img, filterType, levelNum, krnSz){
       tmp = array()
       for(jj in 1:krnSz){
          for(kk in 1:krnSz){
-            tmp = do.call('rbind', list(tmp, ) )
+            tmp = do.call('rbind', list(tmp, imorg[ii,seq(jj+lOffset[1],krnSz,length(imorg)-rOffset[1]), seq(kk+lOffset[2],krnSz:length(imorg)-rOffset[2])]))
          }
       }
-   }
+      
+      list[NegEst[,1], NegEst[,2]] <- negnMth(tmp, J3, beta,1e-6,1)
+      NegEst = array(NegEst, c(r,c,2))
+      gBeta <- gamma(1/NegEst[,,2])
+      
+      hEst = 1/NegEst[,,2] - log(NegEst[,,2])/(2*NegEst[,,1]*gBeta)
+      hEst[ii, is.nan(hEst[ii])] = 0
+      hEst[ii, is.infinite(hEst[ii])] = 0
+      
+      orn = filtLev + 1 
+      salmap[ii] = array(0, c(krnSz,r,c))
+      
+      for(jj in 1:r){
+         for(kk in 1:c){
+            salmap[ii, seq(krnSz*jj-(krnSz-1),krnSz*jj),seq(krnSz*kk-(krnSz-1),krnSz*kk)] = hEst[ii, jj, kk]
+         }
+      }
+      
+      salmap[clr,ii] = padzeros(salmap[ii], floor(length(imorg) - length(salmap[ii]))/2, side = 'left')
+      salmap[clr,ii] = padzeros(salmap[ii], ceiling(length(imorg) - length(salmap[ii]))/2, side = 'right')
+ }
    
 } 
 
