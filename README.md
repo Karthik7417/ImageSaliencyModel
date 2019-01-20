@@ -1,9 +1,7 @@
 # ImageSaliencyModel
 
-This is the repository for my Capstone project with the Army Research Laboratory (ARL). I am helping in translating the code form MATLAB to R. 
+This is the repository for my Capstone project with the Army Research Laboratory (ARL). I have created a R Shiny UI that wraps around MATLAB code. This creates a web based interface to upload images and video files and perform image saliency analysis.
 
-There are 2 main scripts that need to be translated. These two scripts use additional subscripts that may need to be translated too. 
-
-The two main scripts are
+The two main MATLAB scripts are
 1. hMapClrOppGDDNM
 2. cSalMapComb
